@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawPal - Your NU Baliwag AI Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --nu-blue: #1e2a78;
+            --nu-gold: #ffd700;
+            --light-blue: #2c3e8a;
+            --dark-gold: #e6c200;
+            --white: #ffffff;
+            --light-gray: #f5f5f5;
+            --dark-gray: #666;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--nu-blue) 0%, var(--light-blue) 100%);
+            min-height: 100vh;
+            color: var(--white);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--nu-gold);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            border: 3px solid var(--nu-gold);
+            overflow: hidden;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .brand-text h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.2rem;
+            color: var(--nu-gold);
+        }
+
+        .brand-text p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        main {
+            padding: 2rem 0;
+            flex: 1;
+        }
+
+        .chat-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            max-width: 800px;
+            margin: 0 auto;
+            height: 70vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            background: var(--nu-gold);
+            color: var(--nu-blue);
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .chat-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .chat-header p {
+            opacity: 0.8;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            background: var(--white);
+            color: var(--dark-gray);
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.bot {
+            display: flex;
+            gap: 10px;
+        }
+
+        .message.user {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .bot .message-avatar {
+            background: var(--nu-gold);
+            color: var(--nu-blue);
+            overflow: hidden;
+            border: 2px solid var(--nu-gold);
+        }
+
+        .bot .message-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user .message-avatar {
+            background: var(--nu-blue);
+            color: var(--white);
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 1rem 1.25rem;
+            border-radius: 18px;
+            line-height: 1.4;
+        }
+
+        .bot .message-content {
+            background: var(--light-gray);
+            border-bottom-left-radius: 6px;
+        }
+
+        .user .message-content {
+            background: var(--nu-blue);
+            color: var(--white);
+            border-bottom-right-radius: 6px;
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 2rem;
+            color: var(--dark-gray);
+        }
+
+        .welcome-message h3 {
+            color: var(--nu-blue);
+            margin-bottom: 1rem;
+        }
+
+        .chat-input-container {
+            padding: 1.5rem;
+            background: var(--white);
+            border-top: 1px solid #eee;
+        }
+
+        .chat-input-form {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 1rem 1.25rem;
+            border: 2px solid var(--light-gray);
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+            color: var(--dark-gray);
+        }
+
+        .chat-input:focus {
+            border-color: var(--nu-gold);
+        }
+
+        .send-button {
+            background: var(--nu-blue);
+            color: var(--white);
+            border: none;
+            padding: 1rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .send-button:hover:not(:disabled) {
+            background: var(--light-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(30, 42, 120, 0.3);
+        }
+
+        .send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--nu-gold);
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            30% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: var(--nu-gold);
+            opacity: 0.9;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .brand-text h1 {
+                font-size: 1.5rem;
+            }
+
+            .chat-container {
+                height: 75vh;
+                margin: 0 10px;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+
+            .chat-input-form {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .chat-input {
+                width: 100%;
+            }
+
+            .send-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .brand-text h1 {
+                font-size: 1.3rem;
+            }
+
+            .chat-container {
+                height: 80vh;
+                margin: 0 5px;
+                border-radius: 15px;
+            }
+
+            .chat-header {
+                padding: 1rem;
+            }
+
+            .chat-messages {
+                padding: 1rem;
+            }
+
+            .chat-input-container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <img src="bulldog-logo.png" alt="NU Baliwag Bulldog Logo">
+                    </div>
+                    <div class="brand-text">
+                        <h1>PawPal</h1>
+                        <p>National University - Baliwag AI Assistant</p>
+                    </div>
+                </div>
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span>Online</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h2>Chat with PawPal</h2>
+                    <p>Your friendly NU Baliwag virtual assistant</p>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div class="welcome-message">
+                        <h3>🐕 Welcome to PawPal!</h3>
+                        <p>I'm your NU Baliwag AI assistant. Ask me about courses, campus information, events, or anything related to our university. How can I help you today?</p>
+                    </div>
+                </div>
+
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="message-avatar" style="background: var(--nu-gold); color: var(--nu-blue); overflow: hidden; border: 2px solid var(--nu-gold);">
+                        <img src="bulldog-logo.png" alt="PawPal" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+
+                <div class="chat-input-container">
+                    <form class="chat-input-form" id="chatForm">
+                        <input 
+                            type="text" 
+                            class="chat-input" 
+                            id="messageInput" 
+                            placeholder="Type your message here..."
+                            autocomplete="off"
+                        >
+                        <button type="submit" class="send-button" id="sendButton">
+                            <span>Send</span>
+                            <span>📤</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 National University - Baliwag | G12 STEM Capstone Project</p>
+        </div>
+    </footer>
+
+    <script>
+        class PawPalChat {
+            constructor() {
+                this.chatMessages = document.getElementById('chatMessages');
+                this.messageInput = document.getElementById('messageInput');
+                this.chatForm = document.getElementById('chatForm');
+                this.sendButton = document.getElementById('sendButton');
+                this.typingIndicator = document.getElementById('typingIndicator');
+                
+                this.init();
+            }
+
+            init() {
+                this.chatForm.addEventListener('submit', (e) => this.handleSubmit(e));
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.handleSubmit(e);
+                    }
+                });
+            }
+
+            async handleSubmit(e) {
+                e.preventDefault();
+                
+                const message = this.messageInput.value.trim();
+                if (!message) return;
+
+                // Add user message
+                this.addMessage(message, 'user');
+                this.messageInput.value = '';
+                this.toggleSendButton(true);
+
+                // Show typing indicator
+                this.showTyping();
+
+                try {
+                    // Send to Rasa backend
+                    const response = await this.sendToRasa(message);
+                    
+                    // Hide typing indicator
+                    this.hideTyping();
+                    
+                    // Add bot response
+                    this.addMessage(response, 'bot');
+                } catch (error) {
+                    this.hideTyping();
+                    this.addMessage('Sorry, I\'m having trouble connecting right now. Please try again later.', 'bot');
+                    console.error('Error:', error);
+                }
+
+                this.toggleSendButton(false);
+            }
+
+            async sendToRasa(message) {
+                // Replace with your actual Rasa server URL
+                const RASA_URL = 'http://localhost:5005/webhooks/rest/webhook';
+                
+                try {
+                    const response = await fetch(RASA_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            sender: 'user',
+                            message: message
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+
+                    const data = await response.json();
+                    
+                    // Extract bot response
+                    if (data && data.length > 0 && data[0].text) {
+                        return data[0].text;
+                    } else {
+                        return "I'm not sure how to respond to that. Can you try asking in a different way?";
+                    }
+                } catch (error) {
+                    // Fallback responses for development
+                    const fallbackResponses = [
+                        "Hello! I'm PawPal, your NU Baliwag assistant. How can I help you today?",
+                        "That's a great question! I'm still learning about NU Baliwag. Could you be more specific?",
+                        "I'm here to help with information about National University - Baliwag. What would you like to know?",
+                        "As your virtual assistant, I'm ready to help! What can I assist you with regarding NU Baliwag?"
+                    ];
+                    
+                    return fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+                }
+            }
+
+            addMessage(content, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}`;
+                
+                const avatar = document.createElement('div');
+                avatar.className = 'message-avatar';
+                
+                if (sender === 'bot') {
+                    const img = document.createElement('img');
+                    img.src = 'bulldog-logo.png';
+                    img.alt = 'PawPal';
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    avatar.appendChild(img);
+                } else {
+                    avatar.textContent = '👤';
+                }
+                
+                const messageContent = document.createElement('div');
+                messageContent.className = 'message-content';
+                messageContent.textContent = content;
+                
+                if (sender === 'user') {
+                    messageDiv.appendChild(messageContent);
+                    messageDiv.appendChild(avatar);
+                } else {
+                    messageDiv.appendChild(avatar);
+                    messageDiv.appendChild(messageContent);
+                }
+                
+                this.chatMessages.appendChild(messageDiv);
+                this.scrollToBottom();
+            }
+
+            showTyping() {
+                this.typingIndicator.style.display = 'flex';
+                this.scrollToBottom();
+            }
+
+            hideTyping() {
+                this.typingIndicator.style.display = 'none';
+            }
+
+            toggleSendButton(disabled) {
+                this.sendButton.disabled = disabled;
+                this.sendButton.style.opacity = disabled ? '0.6' : '1';
+            }
+
+            scrollToBottom() {
+                setTimeout(() => {
+                    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+                }, 100);
+            }
+        }
+
+        // Initialize the chat when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new PawPalChat();
+        });
+    </script>
+</body>
+</html>
